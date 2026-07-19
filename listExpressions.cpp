@@ -56,6 +56,7 @@ public:
 // Init func
 
 int expressionTest(Expression*[]);
+void otherTests();
 
 // Menu Prototypes
 
@@ -66,11 +67,11 @@ void process();
 
 string enterExpression();
 void newExpression(Expression*[], int&);
-int expressionEvaluation(int, int, char);
 bool expressionValidator(char, int);
 bool operatorValidator(char);
-bool deleteExpression();
+void deleteExpression(Expression * expressionArray[], const int&);
 void clearStream();
+void clearArray(Expression * expressionArray[], const int&);
 
 // Expression Displaying Prototypes
 
@@ -78,13 +79,13 @@ void displayExpression(Expression*[], const int&);
 int numOpExp(char, Expression*[], const int&);
 void listByOperator(Expression*[], const int&);
 void listSummary(Expression*[], const int&);
-int getSmallestResult(Expression*[], const int&);
-int getLargestResult(Expression*[], const int&);
 
 int main(int argc, char* argv[]) {
     process();
     return 0;
 }
+
+////////////////// TESTING FUNCTIONS //////////////////
 
 int expressionTest(Expression * expressionArray[]) {
     int numExpressions = 0;
@@ -106,6 +107,10 @@ int expressionTest(Expression * expressionArray[]) {
     return numExpressions;
 }
 
+void otherTests() {
+
+}
+
 ////////////////// CORE MENU FUNCTIONS //////////////////
 
 /* Process
@@ -117,19 +122,24 @@ void process() {
     int numExpressions = 0;
     Expression * expressionArray[1000];
 
-    cout << "Adding default testing expressions" << endl;
-    numExpressions = expressionTest(expressionArray);
+    cout << "///// ADD TEST VALUES? /////" << endl << "0 for no, 1 for yes: ";
+    bool testMode = false;
+    cin >> testMode; clearStream();
+    if (testMode) {
+        cout << "Adding default testing expressions" << endl << endl << endl;
+        numExpressions = expressionTest(expressionArray);
+    }
 
     int menuChoice = 0;
     do {
         menuChoice = expMenu();
         switch (menuChoice) {
             case 1: newExpression(expressionArray, numExpressions); break;
-            case 2: deleteExpression(); break;
+            case 2: deleteExpression(expressionArray, numExpressions); break;
             case 3: displayExpression(expressionArray, numExpressions); break;
             case 4: listByOperator(expressionArray, numExpressions); break;
             case 5: listSummary(expressionArray, numExpressions); break;
-            case 6: cout << "Goodbye!" << endl; break;
+            case 6: cout << "Goodbye!" << endl; clearArray(expressionArray, numExpressions); break;
             default:
                 break;
         }
@@ -170,9 +180,13 @@ int expMenu() {
     return choice;
 }
 
-////////////////// SUPER FUN AND COMPLICATED ///////////////////////////////
 ///////////////// EXPRESSION SAVING AND PARSING FUNCTIONS //////////////////
 
+/* Enter Expression
+ * Menu prompt that accepts user input to add expressions one-by-one
+ * Input: User prompt in the form of int1 operand int2
+ * Output: Returns this cin input to "newExpression" caller for processing
+ */
 string enterExpression() {
     cout << "======================================================" << endl
          << ">>>>>>>>>>>>>>>> ADD A NEW EXPRESSION <<<<<<<<<<<<<<<<" << endl
@@ -188,6 +202,18 @@ string enterExpression() {
     return newExpression;
 }
 
+/* New Expression
+ * Caller and processor for new expressions added manually by user input.
+ * Input: Calls enterExpression() and retrieves user input.
+ * Output:
+ *      Internal:
+ *          Creates new Expression object and pointer to that expression, which is then added to the
+ *          expression pointer array
+ *          Adds to numExpressions variable
+ *      External:
+ *          Tells user if expression was invalid.
+ *          If valid, prints the expressions including the computed result.
+ */
 void newExpression(Expression * expressionArray[], int &numExpressions) {
     int operand1 = 0, operand2 = 0;
     char mathOperator;
@@ -202,16 +228,19 @@ void newExpression(Expression * expressionArray[], int &numExpressions) {
         stringstream ss2;
         ss << "exp" << numExpressions;
         string expName = ss.str();
-
         auto * newExp = new Expression(operand1, operand2, mathOperator);
         expressionArray[numExpressions] = newExp;
-
-        //results[numExpressions] = result;
         cout << "NEW EXPRESSION:" << endl << newExp->toString() << endl << endl;
         numExpressions++;
     }
 }
 
+/* Operator Validator
+ * Checks if the entered math operator is one of the approved entries. Unlike expressionValidator(),
+ * operatorValidator() does not also check if the expression can be performed.
+ * Input: Call from listByOperator(), including user entered math operator
+ * Output: Returns boolean value to listByOperator() indicating if the operator is allowed or not.
+ */
 bool operatorValidator(const char mathOperator) {
     bool operatorValid = false;
     if (mathOperator == '+' || mathOperator == '-' || mathOperator == '*' || mathOperator == '/' || mathOperator == '%') {
@@ -220,6 +249,14 @@ bool operatorValidator(const char mathOperator) {
     return operatorValid;
 }
 
+/* Expression Validator
+ * Verifies if the expression as entered can be performed.
+ * Input: User input from caller newExpression()
+ * Output: Boolean value indicating if the expression is valid.
+ *         If the operand isn't '+', '-', '*', '/', or '%', returns false.
+ *         If the operand is '/' AND the second integer is '0', returns false.
+ *         Otherwise, returns true.
+ */
 bool expressionValidator(const char mathOperator, const int operand2) {
     bool expressionValid;
     if (mathOperator == '+' || mathOperator == '-' || mathOperator == '*' || mathOperator == '/' || mathOperator == '%') {
@@ -234,25 +271,56 @@ bool expressionValidator(const char mathOperator, const int operand2) {
     return expressionValid;
 }
 
-int expressionEvaluation(const int operand1, const int operand2, const char mathOperator) {
-    int result;
-    switch (mathOperator) {
-        case '-': result = operand1 - operand2; break;
-        case '*': result = operand1 * operand2; break;
-        case '/': result = operand1 / operand2; break;
-        case '%': result = operand1 % operand2; break;
-        default: result = operand1 + operand2; break;
-    }
-    return result;
-}
-
-bool deleteExpression() {
-    bool isDeleted = false;
-
-    return isDeleted;
-}
-
 ////////////////// SIMPLE EXPRESSION RETRIEVAL FUNCTIONS //////////////////
+
+/* Delete Expression
+ * Adds the option for a user to delete an expression from the array
+ * Input: string entry from user
+ * Output: Internal:
+ *              Pointers are deleted to free up memory and are set to nullptr.
+ *         External:
+ *              If no expressions matched, lets the user know none existed.
+ *              Otherwise, prints that deletion was successful.
+ *              If >1 expressions were found and deleted, also outputs number of deletions.
+ */
+void deleteExpression(Expression * expressionArray[], const int &numExpressions) {
+    int operand1 = 0, operand2 = 0, numDeleted = 0; char mathOperator = ' ';
+
+    cout << "======================================================" << endl
+     << ">>>>>>>>>>>>>>>> DELETE EXPRESSION <<<<<<<<<<<<<<<<" << endl
+    << "Enter the expression you want to be deleted." << endl
+    << "======================================================" << endl
+    << "ENTER AN EXPRESSION: ";
+    string newExpression;
+    getline(cin, newExpression);
+    if (cin.fail()) {
+        clearStream();
+    }
+    stringstream ss(newExpression);
+    ss >> operand1 >> mathOperator >> operand2;
+
+    const Expression tempExpression(operand1, operand2, mathOperator);
+    // cout << tempExpression.toString() << endl;
+
+    for (int i = 0; i < numExpressions; i++) {
+        if (expressionArray[i] != nullptr && (expressionArray[i]->isEqual(tempExpression))) {
+            // cout << "Matching expression found at array index" << i << endl;
+            delete expressionArray[i];
+            expressionArray[i] = nullptr;
+            numDeleted++;
+        }
+    }
+
+    if (numDeleted != 0) {
+        if (numDeleted == 1) {
+            cout << "Matching expression deleted." << endl << endl;
+        } else {
+            cout << numDeleted << " matching expressions deleted." << endl << endl;
+        }
+    } else {
+        cout << "No matching expressions were found." << endl << endl;
+    }
+}
 
 /* Display Expression
  * Displays the current running list of all expressions saved by the user
@@ -265,7 +333,9 @@ void displayExpression(Expression * expressionArray[], const int &numExpressions
          << "======================================================" << endl;
     if (numExpressions > 0) {
         for (int i = 0; i < numExpressions; i++) {
-            cout << expressionArray[i]->toString() << endl;
+            if (expressionArray[i] != nullptr) {
+                cout << expressionArray[i]->toString() << endl;
+            }
         }
         cout << endl;
     } else {
@@ -297,7 +367,7 @@ void listByOperator(Expression * expressionArray[], const int &numExpressions) {
             if (const int numOpExpSaved = numOpExp(operatorChoice, expressionArray, numExpressions); numOpExpSaved > 0) {
                 cout << "EXPRESSIONS WITH " << operatorChoice << ":" << endl;
                 for (int i = 0; i < numExpressions; i++) {
-                    if (expressionArray[i]->getOperator() == operatorChoice) {
+                    if (expressionArray[i] != nullptr && (expressionArray[i]->getOperator() == operatorChoice)) {
                         cout << expressionArray[i]->toString() << endl;
                     }
                 }
@@ -321,17 +391,34 @@ void listSummary(Expression * expressionArray[], const int &numExpressions) {
          << ">>>>>>>>>>>>>>>>>>> LIST SUMMARY <<<<<<<<<<<<<<<<<<<<<" << endl
          << "======================================================" << endl << endl;
     if (numExpressions > 0) {
-        // Get count for expressions by operator
-        const int addExp = numOpExp('+', expressionArray, numExpressions);
-        const int subExp = numOpExp('-', expressionArray, numExpressions);
-        const int multExp = numOpExp('*', expressionArray, numExpressions);
-        const int divExp = numOpExp('/', expressionArray, numExpressions);
-        const int modExp = numOpExp('%', expressionArray, numExpressions);
+        // Count number of non-deleted expressions
+        int numActiveExpressions = 0;
+        int addExp = 0, subExp = 0, multExp = 0, divExp = 0, modExp = 0, smallestExp = 0, largestExp = 0;
 
-        const int smallestExp = getSmallestResult(expressionArray, numExpressions);
-        const int largestExp = getLargestResult(expressionArray, numExpressions);
+        for (int i = 0; i < numExpressions; i++) {
+            if (expressionArray[i] != nullptr) {
+                if (expressionArray[i]->getOperator() == '+') {
+                    addExp++;
+                } else if (expressionArray[i]->getOperator() == '-') {
+                    subExp++;
+                } else if (expressionArray[i]->getOperator() == '*') {
+                    multExp++;
+                } else if (expressionArray[i]->getOperator() == '/') {
+                    divExp++;
+                } else if (expressionArray[i]->getOperator() == '%') {
+                    modExp++;
+                }
+                if (expressionArray[i]->getResult() < smallestExp) {
+                    smallestExp = expressionArray[i]->getResult();
+                }
+                if (expressionArray[i]->getResult() > largestExp) {
+                    largestExp = expressionArray[i]->getResult();
+                }
+                numActiveExpressions++;
+            }
+        }
 
-        cout << setw(32) << left << "TOTAL NUMBER OF EXPRESSIONS: " << numExpressions << endl
+        cout << setw(32) << left << "TOTAL NUMBER OF EXPRESSIONS: " << numActiveExpressions << endl
             << setw(32) << "NUMBER OF + EXPRESSIONS: " << addExp << endl
             << setw(32) << "NUMBER OF - EXPRESSIONS:" << subExp << endl
             << setw(32) << "NUMBER OF * EXPRESSIONS:" << multExp << endl
@@ -352,41 +439,11 @@ void listSummary(Expression * expressionArray[], const int &numExpressions) {
 int numOpExp(const char operatorChoice, Expression * expressionArray[], const int &numExpressions) {
     int numOpExp = 0;
     for (int i = 0; i < numExpressions; i++) {
-        if (expressionArray[i]->getOperator() == operatorChoice) {
+        if (expressionArray[i] != nullptr && (expressionArray[i]->getOperator() == operatorChoice)) {
             numOpExp++;
         }
     }
     return numOpExp;
-}
-
-/* Get Largest Result
- * Loops through results array to find the largest value
- * Input: Results array, number of expressions
- * Output: Largest expression result
- */
-int getLargestResult(Expression * expressionArray[], const int &numExpressions) {
-    int largestExp = expressionArray[0]->getResult();
-    for (int i = 0; i < numExpressions; i++) {
-        if (expressionArray[i]->getResult() > largestExp) {
-            largestExp = expressionArray[i]->getResult();
-        }
-    }
-    return largestExp;
-}
-
-/* Get Smallest Result
- * Loops through results array to find the smallest value
- * Input: Results array, number of expressions
- * Output: Smallest expression result
- */
-int getSmallestResult(Expression * expressionArray[], const int &numExpressions) {
-    int smallestExp = expressionArray[0]->getResult();
-    for (int i = 0; i < numExpressions; i++) {
-        if (expressionArray[0]->getResult() < smallestExp) {
-            smallestExp = expressionArray[0]->getResult();
-        }
-    }
-    return smallestExp;
 }
 
 /* Clear Stream
@@ -395,4 +452,16 @@ int getSmallestResult(Expression * expressionArray[], const int &numExpressions)
 void clearStream() {
     cin.clear();
     cin.ignore(INT_MAX, '\n');
+}
+
+/* Clear Array
+ * Deletes all dynamically allocalted memory at the end of the program.
+ * Input: Array of expression pointers
+ * Output: Deletes pointers and sets their value to nullptr
+ */
+void clearArray(Expression *expressionArray[], const int &numExpressions) {
+    for (int i = 0; i < numExpressions; i++) {
+        delete expressionArray[i];
+        expressionArray[i] = nullptr;
+    }
 }
