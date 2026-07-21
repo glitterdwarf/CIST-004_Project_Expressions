@@ -79,7 +79,7 @@ int expMenu() {
         << "   exit" << endl
         << "======================================================" << endl << endl
         << "Enter your choice: ";
-    string menuChoice;
+    string menuChoice = " ";
     getline(cin, menuChoice);
 
     int choice = 0;
@@ -109,7 +109,7 @@ string enterExpression() {
         << "Choose from +, -, *, /, or %" << endl
         << "======================================================" << endl
         << "ENTER AN EXPRESSION: ";
-    string newExpression;
+    string newExpression = " ";
     getline(cin, newExpression);
     if (cin.fail()) {
         clearStream();
@@ -119,7 +119,7 @@ string enterExpression() {
 
 void newExpression(int op1[], int op2[], int results[], char mathOp[], int &numExpressions) {
     int operand1 = 0, operand2 = 0;
-    char mathOperator;
+    char mathOperator = ' ';
     const string newExpression = enterExpression();
     stringstream ss(newExpression);
     ss >> operand1 >> mathOperator >> operand2;
@@ -149,7 +149,7 @@ bool operatorValidator(const char mathOperator) {
 }
 
 bool expressionValidator(const char mathOperator, const int operand2) {
-    bool expressionValid;
+    bool expressionValid = false;
     if (mathOperator == '+' || mathOperator == '-' || mathOperator == '*' || mathOperator == '/' || mathOperator == '%') {
         if (mathOperator == '/' && operand2 == 0) {
             expressionValid = false;
@@ -163,7 +163,7 @@ bool expressionValidator(const char mathOperator, const int operand2) {
 }
 
 int expressionEvaluation(const int operand1, const int operand2, const char mathOperator) {
-    int result;
+    int result = 0;
     switch (mathOperator) {
         case '-': result = operand1 - operand2; break;
         case '*': result = operand1 * operand2; break;
@@ -211,7 +211,7 @@ void listByOperator(int op1[], int op2[], int results[], char mathOp[], const in
         << "Choose from +, -, *, /, or %" << endl
         << "======================================================" << endl
         << "ENTER AN OPERATOR: ";
-        char operatorChoice;
+        char operatorChoice = ' ';
         cin >> operatorChoice;
         if (const bool operatorValid = operatorValidator(operatorChoice); cin.fail() || !operatorValid) {
             cout << "Invalid operator." << endl << endl;
