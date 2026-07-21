@@ -172,7 +172,7 @@ int expMenu() {
             << "======================================================" << endl
             << "Select One (case-sensitive): add, delete, listall, listbyoperator, listsummary, exit" << endl
             << "Enter your choice: ";
-    string menuChoice;
+    string menuChoice = " ";
     getline(cin, menuChoice);
 
     int choice = 0;
@@ -208,7 +208,7 @@ string enterExpression() {
             << "Choose from +, -, *, /, or %" << endl
             << "======================================================" << endl
             << "ENTER AN EXPRESSION: ";
-    string newExpression;
+    string newExpression = " ";
     getline(cin, newExpression);
     if (cin.fail()) {
         clearStream();
@@ -230,7 +230,7 @@ string enterExpression() {
  */
 void newExpression(Expression *expressionArray[], int &numExpressions) {
     int operand1 = 0, operand2 = 0;
-    char mathOperator;
+    char mathOperator = ' ';
     const string newExpression = enterExpression();
     stringstream ss(newExpression);
     ss >> operand1 >> mathOperator >> operand2;
@@ -273,7 +273,7 @@ bool operatorValidator(const char mathOperator) {
  *         Otherwise, returns true.
  */
 bool expressionValidator(const char mathOperator, const int operand2) {
-    bool expressionValid;
+    bool expressionValid = false;
     if (mathOperator == '+' || mathOperator == '-' || mathOperator == '*' || mathOperator == '/' || mathOperator ==
         '%') {
         if (mathOperator == '/' && operand2 == 0) {
@@ -308,7 +308,7 @@ void deleteExpression(Expression *expressionArray[], const int &numExpressions) 
             << "Enter the expression you want to be deleted." << endl
             << "======================================================" << endl
             << "ENTER AN EXPRESSION: ";
-    string newExpression;
+    string newExpression = " ";
     getline(cin, newExpression);
     if (cin.fail()) {
         clearStream();
@@ -373,7 +373,7 @@ void listByOperator(Expression *expressionArray[], const int &numExpressions) {
                 << "Choose from +, -, *, /, or %" << endl
                 << "======================================================" << endl
                 << "ENTER AN OPERATOR: ";
-        char operatorChoice;
+        char operatorChoice = ' ';
         cin >> operatorChoice;
         if (const bool operatorValid = operatorValidator(operatorChoice); cin.fail() || !operatorValid) {
             cout << "Invalid operator." << endl << endl;
@@ -436,12 +436,12 @@ void listSummary(Expression *expressionArray[], const int &numExpressions) {
 
         cout << setw(32) << left << "TOTAL NUMBER OF EXPRESSIONS: " << numActiveExpressions << endl
                 << setw(32) << "NUMBER OF + EXPRESSIONS: " << addExp << endl
-                << setw(32) << "NUMBER OF - EXPRESSIONS:" << subExp << endl
-                << setw(32) << "NUMBER OF * EXPRESSIONS:" << multExp << endl
-                << setw(32) << "NUMBER OF / EXPRESSIONS:" << divExp << endl
-                << setw(32) << "NUMBER OF % EXPRESSIONS:" << modExp << endl
-                << setw(32) << "LARGEST EXPRESSIONS:" << largestExp << endl
-                << setw(32) << "SMALLEST EXPRESSIONS:" << smallestExp << endl << endl;
+                << setw(32) << "NUMBER OF - EXPRESSIONS: " << subExp << endl
+                << setw(32) << "NUMBER OF * EXPRESSIONS: " << multExp << endl
+                << setw(32) << "NUMBER OF / EXPRESSIONS: " << divExp << endl
+                << setw(32) << "NUMBER OF % EXPRESSIONS: " << modExp << endl
+                << setw(32) << "LARGEST EXPRESSIONS: " << largestExp << endl
+                << setw(32) << "SMALLEST EXPRESSIONS: " << smallestExp << endl << endl;
     } else {
         cout << "There are no expressions recorded yet." << endl << endl;
     }
@@ -480,6 +480,6 @@ void clearArray(Expression *expressionArray[], const int &numExpressions) {
         delete expressionArray[i];
         expressionArray[i] = nullptr;
     }
-    delete expressionArray;
-    expressionArray = nullptr;
+    delete *expressionArray;
+    *expressionArray = nullptr;
 }
